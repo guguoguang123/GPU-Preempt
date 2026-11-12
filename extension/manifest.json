@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "GPU-Preempt · AutoDL 定时抢卡",
+  "version": "1.1.0",
+  "description": "指定已有实例及机器，在时间窗口内每 5 秒尝试有卡开机。",
+  "permissions": [
+    "storage"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.autodl.com/console/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "展开 AutoDL 抢卡面板"
+  }
+}
