@@ -11,7 +11,7 @@ function setup() {
   const engine = createEngine({ read: () => page, status: () => {}, log: () => {},
     ...Object.fromEntries(Object.keys(calls).map(key => [key, () => { calls[key]++; }])),
     hasGpuAction: item => !!item.gpu, hasConfirm: item => !!item.confirm });
-  const config = { start: now, end: now + 10000000, interval: 5000 };
+  const config = { start: now, end: now + 10000000, interval: 5000, stopAtEnd: true };
   engine.start(config);
   return { engine, page, calls, config, tick: (delta = 0) => { now += delta; engine.tick(now); }, state: () => engine.getState() };
 }
@@ -47,10 +47,12 @@ test('request timeout refreshes without blind re-submit', () => { const x = setu
 test('recovery preserves attempt count and retry delay', () => { const x = setup(); x.engine.stop(); x.engine.start({ ...x.config, initialAttempts: 95, retryNotBefore: 105000 }); x.tick(); assert.equal(x.calls.start, 0); x.tick(5000); assert.equal(x.state().attempts, 96); });
 test('recovery checks running before new submit', () => { const x = setup(); x.engine.stop(); x.engine.start({ ...x.config, initialAttempts: 95, retryNotBefore: 105000 }); x.page.row = 'running'; x.tick(); assert.equal(x.calls.start, 0); assert.equal(x.state().kind, 'success'); });
 test('deadline stops during recovery', () => { const x = setup(); x.page.dialogs = [{ text: '未知弹窗' }]; x.config.end = 105000; x.tick(); x.tick(5000); assert.equal(x.calls.reload, 0); assert.equal(x.state().kind, 'expired'); });
+test('default keeps retrying past old end time', () => { const x = setup(); x.config.stopAtEnd = false; x.config.end = 100001; x.tick(2); assert.equal(x.calls.start, 1); assert.equal(x.state().active, true); });
+test('no-GPU running is not success', () => { const x = setup(); x.page.row = 'no-gpu'; x.tick(); assert.equal(x.state().active, true); assert.equal(x.calls.start, 0); assert.notEqual(x.state().kind, 'success'); });
 test('package and userscript match', () => {
   const read = name => fs.readFileSync(path.join(__dirname, name), 'utf8');
   const manifest = JSON.parse(read('extension/manifest.json'));
-  assert.equal(manifest.version, '1.2.0');
+  assert.equal(manifest.version, '1.2.1');
   assert.deepEqual(manifest.content_scripts[0].js, ['engine.js', 'content.js']);
   assert.deepEqual(manifest.permissions, ['storage']);
   const content = read('extension/content.js');

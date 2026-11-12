@@ -28,7 +28,7 @@
     }
     function tick(now = Date.now()) {
       if (!active) return;
-      if (now >= cfg.end) { stop('已到结束时间，停止后续请求。', 'expired'); return; }
+      if (cfg.stopAtEnd === true && now >= cfg.end) { stop('已到你启用的结束时间，停止后续请求。', 'expired'); return; }
       if (now < cfg.start) { publish('scheduled', '等待开始时间。', cfg.start); return; }
       function recover(message, delay = 15000) {
         if (blockedSince === null) blockedSince = now;
@@ -48,6 +48,7 @@
         const dialogs = page.dialogs || [], notices = page.notices || [];
         const all = [...dialogs, ...notices];
         if (page.row === 'running') { stop('已确认目标实例运行，抢卡完成。', 'success'); return; }
+        if (page.row === 'no-gpu') { publish('blocked', '目标为无卡运行，不算抢卡成功；请切回有卡开机，任务保持运行。'); return; }
         if (all.some(item => fatal.test(item.text))) {
           if (pending) { pending = false; failed = true; next = Math.max(next, now + 60000); }
           dialogs.filter(item => fatal.test(item.text)).forEach(item => io.cancel(item));
