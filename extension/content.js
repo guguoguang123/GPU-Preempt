@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AutoDL 指定机器定时开机
 // @namespace    local.autodl.gpu.watch
-// @version      1.2.1
+// @version      1.2.2
 // @description  在指定时间窗口重试已有普通容器实例的有卡开机
 // @match        https://www.autodl.com/console/*
 // @grant        none
@@ -24,14 +24,14 @@
   panel.innerHTML = `
     <b style="font-size:17px">AutoDL 定时抢指定机器</b> <button data-action="collapse">收起</button> <button data-action="close">关闭</button>
     <div data-status role="status" style="margin:8px 0;padding:9px;background:#eef2ff;border-radius:6px;font-weight:bold">已停止 · 未开始</div>
-    <div data-detail style="font-size:12px;color:#48556a;margin-bottom:8px">v1.2.1</div><div data-body>
+    <div data-detail style="font-size:12px;color:#48556a;margin-bottom:8px">v1.2.2</div><div data-body>
     <div>实例名或完整实例 ID（精确匹配）</div>
     <input data-field="target" value="sim">
     <div>机器标识（同时核对，如 253机）</div>
     <input data-field="machine" value="018机">
     <div>开始时间（本机时区）</div><input data-field="start" type="datetime-local" step="1">
-    <label><input data-field="stopAtEnd" type="checkbox"> 到结束时间停止（默认关闭）</label>
-    <div>可选结束时间（不勾选则一直抢到成功）</div><input data-field="end" type="datetime-local" step="1">
+    <label><input data-field="stopAtEnd" type="checkbox" checked> 到结束时间停止（默认开启）</label>
+    <div>结束时间（本机时区）</div><input data-field="end" type="datetime-local" step="1">
     <div>重试间隔（秒，最少 5）</div><input data-field="interval" type="number" min="5" value="5">
     <div style="margin:10px 0"><button data-action="check">检查目标</button> <button data-action="start">开始等待</button> <button data-action="stop">停止</button></div>
     <div>仅已有实例；有卡开机会计费。保持此页打开、电脑不休眠。停止不会关机或撤回已提交请求。</div>
@@ -77,7 +77,7 @@
   };
   const restoreSettings = settings => {
     if (!settings || settingsEdited || active) return;
-    input('stopAtEnd').checked = settings.stopAtEnd === true;
+    input('stopAtEnd').checked = settings.stopAtEnd !== false;
     for (const key of ['target', 'machine', 'interval']) {
       if (typeof settings[key] === 'string') input(key).value = settings[key];
     }
@@ -108,7 +108,7 @@
     const badge = panel.querySelector('[data-status]');
     badge.textContent = (labels[statusState.kind] || statusState.kind) + (left ? ' · ' + left + ' 秒' : '');
     badge.style.background = statusState.kind === 'success' ? '#dcfce7' : ['error', 'blocked', 'offline'].includes(statusState.kind) ? '#fff1d6' : '#eef2ff';
-    panel.querySelector('[data-detail]').textContent = 'v1.2.1 · 已尝试 ' + statusState.attempts + ' 次 · ' + statusState.message;
+    panel.querySelector('[data-detail]').textContent = 'v1.2.2 · 已尝试 ' + statusState.attempts + ' 次 · ' + statusState.message;
     panel.querySelector('[data-action="start"]').disabled = active;
     panel.querySelector('[data-action="stop"]').disabled = !active;
     panel.querySelectorAll('input').forEach(el => { el.disabled = active; });

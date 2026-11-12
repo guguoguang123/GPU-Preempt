@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "GPU-Preempt · AutoDL 定时抢卡",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "指定已有实例及机器，在时间窗口内每 5 秒尝试有卡开机。",
   "permissions": [
     "storage"

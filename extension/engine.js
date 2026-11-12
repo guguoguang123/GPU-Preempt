@@ -28,7 +28,7 @@
     }
     function tick(now = Date.now()) {
       if (!active) return;
-      if (cfg.stopAtEnd === true && now >= cfg.end) { stop('已到你启用的结束时间，停止后续请求。', 'expired'); return; }
+      if (cfg.stopAtEnd !== false && now >= cfg.end) { stop('已到你设定的结束时间，停止后续请求。', 'expired'); return; }
       if (now < cfg.start) { publish('scheduled', '等待开始时间。', cfg.start); return; }
       function recover(message, delay = 15000) {
         if (blockedSince === null) blockedSince = now;
