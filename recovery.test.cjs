@@ -52,13 +52,14 @@ test('default deadline remains enabled', () => { const x = setup(); delete x.con
 test('no-GPU running is not success', () => { const x = setup(); x.page.row = 'no-gpu'; x.tick(); assert.equal(x.state().active, true); assert.equal(x.calls.start, 0); assert.notEqual(x.state().kind, 'success'); });
 test('package and userscript match', () => {
   const read = name => fs.readFileSync(path.join(__dirname, name), 'utf8');
+  const normalize = text => text.replace(/\r\n?/g, '\n');
   const manifest = JSON.parse(read('extension/manifest.json'));
   assert.equal(manifest.version, '1.2.2');
   assert.deepEqual(manifest.content_scripts[0].js, ['engine.js', 'content.js']);
   assert.deepEqual(manifest.permissions, ['storage']);
-  const content = read('extension/content.js');
+  const content = normalize(read('extension/content.js'));
   const boundary = content.indexOf('// ==/UserScript==') + '// ==/UserScript=='.length;
-  assert.equal(read('autodl_gpu_watch.user.js'), content.slice(0, boundary) + '\n' + read('extension/engine.js') + '\n' + content.slice(boundary));
+  assert.equal(normalize(read('autodl_gpu_watch.user.js')), content.slice(0, boundary) + '\n' + normalize(read('extension/engine.js')) + '\n' + content.slice(boundary));
   assert.ok(content.indexOf('data-status') < content.indexOf('<div data-body>'));
 });
 console.log(`${count} regression checks passed. No live AutoDL requests.`);
